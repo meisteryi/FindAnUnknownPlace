@@ -122,33 +122,50 @@ let initialTranslateY = 0;
 let isDragging = false;
 let isExpanded = false;
 let dragStartTime = 0;
+let isTouch = false; // 터치 기기 여부 판별 (고스트 마우스 이벤트 방지용)
 
 function isMobile() {
   return window.innerWidth <= 768;
 }
 
 function getClientY(e) {
-  return e.changedTouches ? e.changedTouches[0].clientY : e.clientY;
+  if (e.type.startsWith('mouse')) return e.clientY;
+  return e.type === 'touchend'
+    ? e.changedTouches[0].clientY
+    : e.touches[0].clientY;
 }
 
 function onDragStart(e) {
   if (!isMobile()) return;
+
+  // 서랍이 열려있을 때 핸들 영역이 아닌 내부 컨텐츠를 터치하면 스크롤되도록 드래그 무시
+  if (isExpanded && !e.target.closest('.drag-handle-wrapper')) return;
+
+  // 버튼이나 파일 업로드 라벨을 터치했을 때는 서랍 드래그/토글 동작 막기
+  if (e.target.closest('button, label, input')) return;
+
+  if (e.type.startsWith('touch')) isTouch = true;
+  if (isTouch && e.type.startsWith('mouse')) return; // 터치 기기에서 발생하는 마우스 이벤트 무시
+
+  if (e.cancelable) e.preventDefault(); // 핵심: 브라우저 기본 스크롤 및 튕김 현상 원천 차단
+
   isDragging = true;
   dragStartTime = Date.now();
   startY = getClientY(e);
 
-  const maxTranslateY = uiPanel.offsetHeight - 120;
+  const maxTranslateY = uiPanel.getBoundingClientRect().height - 120;
   initialTranslateY = isExpanded ? 0 : maxTranslateY;
   uiPanel.classList.add('dragging');
 }
 
 function onDragMove(e) {
   if (!isDragging) return;
-  if (e.cancelable) e.preventDefault(); // 드래그 중 화면 튕김(스크롤) 차단
+  if (isTouch && e.type.startsWith('mouse')) return;
+  if (e.cancelable) e.preventDefault();
 
   const deltaY = getClientY(e) - startY;
   let newTranslateY = initialTranslateY + deltaY;
-  const maxTranslateY = uiPanel.offsetHeight - 120;
+  const maxTranslateY = uiPanel.getBoundingClientRect().height - 120;
 
   if (newTranslateY < 0) newTranslateY = 0;
   if (newTranslateY > maxTranslateY) newTranslateY = maxTranslateY;
@@ -157,13 +174,15 @@ function onDragMove(e) {
 
 function onDragEnd(e) {
   if (!isDragging) return;
+  if (isTouch && e.type.startsWith('mouse')) return;
+
   isDragging = false;
   uiPanel.classList.remove('dragging');
   uiPanel.style.transform = '';
 
   const dragDuration = Date.now() - dragStartTime;
   const deltaY = getClientY(e) - startY;
-  const maxTranslateY = uiPanel.offsetHeight - 120;
+  const maxTranslateY = uiPanel.getBoundingClientRect().height - 120;
 
   // 클릭(짧은 터치)으로 인식된 경우 상태 반전(토글)
   if (dragDuration < 200 && Math.abs(deltaY) < 10) {
@@ -177,11 +196,12 @@ function onDragEnd(e) {
   else uiPanel.classList.remove('expanded');
 }
 
-if (dragHandle) {
-  dragHandle.addEventListener('touchstart', onDragStart, { passive: false });
+if (uiPanel) {
+  // 이벤트 리스너를 패널 전체로 확장하여 삐져나온 곳 아무 데나 잡고 끌어올릴 수 있게 합니다.
+  uiPanel.addEventListener('touchstart', onDragStart, { passive: false });
   document.addEventListener('touchmove', onDragMove, { passive: false });
   document.addEventListener('touchend', onDragEnd, { passive: false });
-  dragHandle.addEventListener('mousedown', onDragStart);
+  uiPanel.addEventListener('mousedown', onDragStart);
   document.addEventListener('mousemove', onDragMove);
   document.addEventListener('mouseup', onDragEnd);
 }

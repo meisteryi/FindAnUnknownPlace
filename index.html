@@ -60,20 +60,25 @@
         여행 중에 찍은 사진을 업로드해 발자취를 남겨보세요!
       </div>
 
-      <label class="upload-btn" id="upload-label">
-        📸 사진 업로드 (여러 장 가능)
-        <input
-          type="file"
-          id="file-upload"
-          accept="image/jpeg, image/png, image/heic"
-          multiple
-          style="display: none"
-        />
-      </label>
+      <!-- 메인 액션 버튼 그룹 -->
+      <div class="main-actions">
+        <label class="upload-btn" id="upload-label">
+          📸 사진 업로드 (여러 장 가능)
+          <input
+            type="file"
+            id="file-upload"
+            accept="image/jpeg, image/png, image/heic"
+            multiple
+            style="display: none"
+          />
+        </label>
 
-      <button class="location-btn" id="current-location-btn">
-        📍 현재 내 위치로 이동
-      </button>
+        <button class="location-btn" id="current-location-btn">
+          📍 현재 내 위치로 이동
+        </button>
+
+        <button id="toggle-history">📜 방문 히스토리 보기</button>
+      </div>
 
       <!-- 빠른 이동 버튼 (한국 & 일본) -->
       <div class="city-section">
@@ -177,11 +182,6 @@
           </button>
         </div>
       </div>
-
-      <!-- 히스토리 버튼 추가 -->
-      <button id="toggle-history" class="city-btn">
-        📜 방문 히스토리 보기
-      </button>
     </div>
 
     <!-- 히스토리 패널 -->

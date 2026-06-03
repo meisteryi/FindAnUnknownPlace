@@ -17,12 +17,21 @@
 
     <!-- CSS, JS 파일 연결 -->
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./ui.css" />
+    <link rel="stylesheet" href="./mobile.css" />
     <script src="./app.js" defer></script>
+    <script src="./history.js" defer></script>
+    <script src="./ui.js" defer></script>
   </head>
   <body>
     <div id="map"></div>
 
     <div id="ui-panel">
+      <!-- 드래그 핸들 추가 -->
+      <div id="drag-handle" class="drag-handle-wrapper">
+        <div class="drag-handle"></div>
+      </div>
+
       <h1 style="margin: 0; font-size: 22px; color: #111">🌍 Unseen Map</h1>
       <div style="font-size: 14px; color: #555">
         여러 장의 사진을 올려 발자취를 남겨보세요!
@@ -39,111 +48,126 @@
         />
       </label>
 
+      <button class="location-btn" id="current-location-btn">
+        📍 내 위치로 이동
+      </button>
+
       <!-- 빠른 이동 버튼 (한국 & 일본) -->
       <div class="city-section">
-        <div style="font-size: 14px; font-weight: bold; color: #333">
-          🇰🇷 한국 대도시
-        </div>
+        <div class="city-region-title">🇰🇷 한국</div>
+
+        <div class="city-sub-title">수도권/강원</div>
         <div class="button-group">
           <button class="city-btn" onclick="moveToCity(37.5665, 126.978, 11)">
             서울
           </button>
+          <button class="city-btn" onclick="moveToCity(37.2636, 127.0286, 11)">
+            수원
+          </button>
+          <button class="city-btn" onclick="moveToCity(37.4563, 126.7052, 11)">
+            인천
+          </button>
+          <button class="city-btn" onclick="moveToCity(37.7518, 128.876, 11)">
+            강릉
+          </button>
+          <button class="city-btn" onclick="moveToCity(38.0754, 128.619, 11)">
+            양양
+          </button>
+        </div>
+
+        <div class="city-sub-title">충청/경상</div>
+        <div class="button-group">
+          <button class="city-btn" onclick="moveToCity(36.3504, 127.3845, 11)">
+            대전
+          </button>
           <button class="city-btn" onclick="moveToCity(35.1796, 129.0756, 11)">
             부산
+          </button>
+          <button class="city-btn" onclick="moveToCity(35.8714, 128.6014, 11)">
+            대구
+          </button>
+          <button class="city-btn" onclick="moveToCity(35.8562, 129.2247, 11)">
+            경주
+          </button>
+        </div>
+
+        <div class="city-sub-title">전라/제주</div>
+        <div class="button-group">
+          <button class="city-btn" onclick="moveToCity(35.1595, 126.8526, 11)">
+            광주
+          </button>
+          <button class="city-btn" onclick="moveToCity(35.8242, 127.148, 11)">
+            전주
           </button>
           <button class="city-btn" onclick="moveToCity(33.4996, 126.5312, 11)">
             제주
           </button>
-          <button class="city-btn" onclick="moveToCity(36.3504, 127.3845, 11)">
-            대전
-          </button>
         </div>
 
-        <div
-          style="
-            font-size: 14px;
-            font-weight: bold;
-            color: #333;
-            margin-top: 8px;
-          "
-        >
-          🇯🇵 일본 대도시
-        </div>
+        <div class="city-region-title mt">🇯🇵 일본</div>
+
+        <div class="city-sub-title">간토/홋카이도</div>
         <div class="button-group">
           <button class="city-btn" onclick="moveToCity(35.6895, 139.6917, 11)">
             도쿄
           </button>
-          <button class="city-btn" onclick="moveToCity(34.6937, 135.5023, 11)">
-            오사카
-          </button>
-          <button class="city-btn" onclick="moveToCity(33.5902, 130.4017, 11)">
-            후쿠오카
+          <button class="city-btn" onclick="moveToCity(35.4437, 139.638, 11)">
+            요코하마
           </button>
           <button class="city-btn" onclick="moveToCity(43.0618, 141.3545, 11)">
             삿포로
+          </button>
+          <button class="city-btn" onclick="moveToCity(41.7687, 140.7288, 11)">
+            하코다테
+          </button>
+        </div>
+
+        <div class="city-sub-title">간사이/도카이</div>
+        <div class="button-group">
+          <button class="city-btn" onclick="moveToCity(34.6937, 135.5023, 11)">
+            오사카
+          </button>
+          <button class="city-btn" onclick="moveToCity(35.0116, 135.7681, 11)">
+            교토
+          </button>
+          <button class="city-btn" onclick="moveToCity(35.1815, 136.9066, 11)">
+            나고야
+          </button>
+          <button class="city-btn" onclick="moveToCity(34.9756, 138.3828, 11)">
+            시즈오카
+          </button>
+        </div>
+
+        <div class="city-sub-title">규슈/시코쿠/기타</div>
+        <div class="button-group">
+          <button class="city-btn" onclick="moveToCity(33.5902, 130.4017, 11)">
+            후쿠오카
+          </button>
+          <button class="city-btn" onclick="moveToCity(34.3401, 134.0433, 11)">
+            다카마쓰
+          </button>
+          <button class="city-btn" onclick="moveToCity(34.3853, 132.4553, 11)">
+            히로시마
+          </button>
+          <button class="city-btn" onclick="moveToCity(26.2124, 127.6809, 11)">
+            오키나와
           </button>
         </div>
       </div>
 
       <!-- 히스토리 버튼 추가 -->
-      <button
-        id="toggle-history"
-        class="city-btn"
-        style="
-          background-color: #28a745;
-          color: white;
-          border: none;
-          padding: 10px;
-          font-weight: bold;
-          font-size: 14px;
-          margin-top: 10px;
-        "
-      >
+      <button id="toggle-history" class="city-btn">
         📜 방문 히스토리 보기
       </button>
     </div>
 
     <!-- 히스토리 패널 -->
     <div id="history-panel" class="hidden">
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 16px;
-          padding-bottom: 10px;
-          border-bottom: 2px solid #eee;
-        "
-      >
+      <div class="history-header">
         <h2 style="margin: 0; font-size: 18px">방문 히스토리</h2>
         <div>
-          <button
-            id="clear-all-history"
-            style="
-              background: #dc3545;
-              color: white;
-              border: none;
-              padding: 6px 10px;
-              border-radius: 4px;
-              font-size: 12px;
-              cursor: pointer;
-              margin-right: 8px;
-            "
-          >
-            전체 삭제
-          </button>
-          <button
-            id="close-history"
-            style="
-              background: none;
-              border: none;
-              font-size: 24px;
-              cursor: pointer;
-              color: #555;
-            "
-          >
-            &times;
-          </button>
+          <button id="clear-all-history">전체 삭제</button>
+          <button id="close-history">&times;</button>
         </div>
       </div>
       <div id="history-list"></div>
@@ -153,28 +177,6 @@
     <div id="toast-message"></div>
 
     <!-- 개발용 초기화 버튼 -->
-    <button
-      id="dev-reset-btn"
-      style="
-        position: fixed;
-        bottom: 20px;
-        left: 20px;
-        z-index: 9999;
-        background: #ff4444;
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        font-size: 12px;
-        cursor: pointer;
-        opacity: 0.8;
-        transition: opacity 0.2s;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-      "
-      onmouseover="this.style.opacity = '1'"
-      onmouseout="this.style.opacity = '0.8'"
-    >
-      🛠️ 개발용 초기화
-    </button>
+    <button id="dev-reset-btn">🛠️ 개발용 초기화</button>
   </body>
 </html>

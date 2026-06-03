@@ -37,6 +37,12 @@ const greenDotIcon = L.divIcon({
 // 마커를 효율적으로 관리(전체 삭제/그리기)하기 위한 레이어 그룹 추가
 const markerGroup = L.layerGroup().addTo(map);
 
+// 히스토리 클릭 시 표시될 임시 핀(마커) 변수
+let activeHistoryMarker = null;
+
+// 현 위치를 표시할 마커 변수
+let currentLocationMarker = null;
+
 // 토스트 메시지 띄우는 함수
 function showToast(message) {
   const toast = document.getElementById('toast-message');
@@ -47,6 +53,48 @@ function showToast(message) {
     toast.classList.remove('toast-visible');
   }, 3500); // 3.5초 후 스르륵 사라짐
 }
+
+// 현 위치로 이동 로직
+document
+  .getElementById('current-location-btn')
+  .addEventListener('click', () => {
+    if (!navigator.geolocation) {
+      alert('이 브라우저에서는 위치 정보 기능을 지원하지 않습니다.');
+      return;
+    }
+
+    showToast('📍 현재 위치를 찾는 중입니다...');
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+
+        map.flyTo([lat, lng], 15, { duration: 1.5 });
+
+        // 기존 마커가 있으면 위치 업데이트, 없으면 새로 생성
+        if (currentLocationMarker) {
+          currentLocationMarker.setLatLng([lat, lng]);
+        } else {
+          const blueDotIcon = L.divIcon({
+            className: 'current-location-marker',
+            iconSize: [18, 18],
+            iconAnchor: [9, 9],
+          });
+          currentLocationMarker = L.marker([lat, lng], {
+            icon: blueDotIcon,
+          }).addTo(map);
+        }
+      },
+      (error) => {
+        console.error('위치 정보 에러:', error);
+        alert(
+          '위치 정보를 가져올 수 없습니다. 브라우저의 위치 권한을 허용해주세요.',
+        );
+      },
+      { enableHighAccuracy: true }, // 더 정확한 GPS 정보 요구
+    );
+  });
 
 // 3. 로컬 스토리지 키 및 기존 저장 데이터 불러오기
 const STORAGE_KEY = 'unseen_map_history';
@@ -192,6 +240,16 @@ function renderHistory() {
   reversed.forEach((loc) => {
     const item = document.createElement('div');
     item.className = 'history-item';
+    item.onclick = () => {
+      map.flyTo([loc.lat, loc.lng], 15, { duration: 1.5 });
+
+      // 기존에 꽂혀있던 임시 핀이 있다면 제거
+      if (activeHistoryMarker) {
+        map.removeLayer(activeHistoryMarker);
+      }
+      // 클릭한 위치에 새로운 임시 핀 꽂기 (Leaflet 기본 파란색 핀)
+      activeHistoryMarker = L.marker([loc.lat, loc.lng]).addTo(map);
+    };
 
     const addressDiv = document.createElement('div');
     addressDiv.className = 'history-address';
@@ -204,7 +262,10 @@ function renderHistory() {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'delete-btn';
     deleteBtn.innerText = '삭제';
-    deleteBtn.onclick = () => deleteRecord(loc.id);
+    deleteBtn.onclick = (e) => {
+      e.stopPropagation(); // 삭제 버튼을 누를 때는 지도 이동 이벤트가 실행되지 않게 막습니다
+      deleteRecord(loc.id);
+    };
 
     item.appendChild(addressDiv);
     item.appendChild(dateDiv);
@@ -231,11 +292,22 @@ document.getElementById('toggle-history').addEventListener('click', () => {
   panel.classList.toggle('hidden');
   if (!panel.classList.contains('hidden')) {
     renderHistory();
+  } else {
+    // 패널이 닫힐 때 임시 핀도 함께 제거
+    if (activeHistoryMarker) {
+      map.removeLayer(activeHistoryMarker);
+      activeHistoryMarker = null;
+    }
   }
 });
 
 document.getElementById('close-history').addEventListener('click', () => {
   document.getElementById('history-panel').classList.add('hidden');
+  // 패널이 닫힐 때 임시 핀도 함께 제거
+  if (activeHistoryMarker) {
+    map.removeLayer(activeHistoryMarker);
+    activeHistoryMarker = null;
+  }
 });
 
 // ==== 1. 전체 삭제 기능 ====

@@ -1,0 +1,75 @@
+/* ==== 드래그 핸들 (모바일 전용) ==== */
+.drag-handle-wrapper {
+  display: none;
+  width: 100%;
+  height: 50px; /* 잡히는 부위 크게 확대 */
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  touch-action: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+.drag-handle {
+  width: 60px;
+  height: 6px;
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+  .drag-handle-wrapper {
+    display: flex;
+  }
+
+  #ui-panel,
+  #history-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 50px 20px 20px 20px; /* 핸들 영역 공간 확보 */
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  #ui-panel {
+    height: 85vh;
+    max-height: none;
+    transform: translateY(calc(100% - 120px)); /* 설명만 보임 */
+    transition: transform 0.3s ease;
+  }
+
+  #ui-panel.expanded {
+    transform: translateY(0);
+  }
+  #ui-panel.dragging {
+    transition: none;
+  }
+
+  #history-panel {
+    max-height: 70vh;
+    z-index: 1010;
+  }
+  .hidden {
+    transform: translateY(50px) !important;
+  }
+
+  .city-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+
+  #toast-message {
+    bottom: auto;
+    top: 20px;
+    transform: translate(-50%, -20px);
+  }
+  #dev-reset-btn {
+    bottom: auto;
+    top: 20px;
+    right: 20px;
+    left: auto;
+  }
+}

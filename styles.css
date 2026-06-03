@@ -29,6 +29,27 @@ body {
   min-width: 280px;
   max-height: 90vh;
   overflow-y: auto;
+  box-sizing: border-box;
+}
+
+/* ==== 드래그 핸들 스타일 ==== */
+.drag-handle-wrapper {
+  display: none; /* 데스크톱에서는 숨김 */
+  width: 100%;
+  height: 50px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer; /* 클릭도 가능함을 표시 */
+  touch-action: none; /* 드래그 도중 브라우저 자체 스와이프 튕김 현상 방지 */
+  position: absolute; /* 패널 안의 다른 요소에 밀리지 않게 최상단 고정 */
+  top: 0;
+  left: 0;
+}
+.drag-handle {
+  width: 60px; /* 핸들 바 가로 크기 확대 */
+  height: 6px; /* 핸들 바 두께 확대 */
+  background-color: #ccc;
+  border-radius: 3px;
 }
 
 .upload-btn {
@@ -46,6 +67,23 @@ body {
 
 .upload-btn:hover {
   background-color: #0056b3;
+}
+
+.location-btn {
+  background-color: #17a2b8;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.location-btn:hover {
+  background-color: #138496;
 }
 
 .city-section {
@@ -88,6 +126,14 @@ body {
   pointer-events: none; /* 점 위에 마우스를 올려도 지도가 컨트롤되게 함 */
 }
 
+/* 현 위치를 표시하는 커스텀 파란색 원 마커 */
+.current-location-marker {
+  background-color: #007bff;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
 /* ==== 히스토리 패널 스타일 ==== */
 #history-panel {
   position: absolute;
@@ -103,10 +149,21 @@ body {
   flex-direction: column;
   width: 320px;
   max-height: 90vh;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease,
+    visibility 0.3s ease;
+  opacity: 1;
+  transform: translateY(0);
+  visibility: visible;
+  box-sizing: border-box;
 }
 
 .hidden {
-  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transform: translateY(-20px) !important;
+  pointer-events: none !important;
 }
 
 #history-list {
@@ -117,11 +174,17 @@ body {
 }
 
 .history-item {
-  padding: 12px 0;
+  padding: 12px 8px;
   border-bottom: 1px solid #eee;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.history-item:hover {
+  background-color: #f8f9fa;
 }
 
 .history-address {
@@ -157,7 +220,7 @@ body {
   position: absolute;
   bottom: 40px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, 20px);
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
   padding: 14px 28px;
@@ -166,10 +229,174 @@ body {
   font-weight: bold;
   z-index: 2000;
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
   pointer-events: none;
 }
 
 #toast-message.toast-visible {
   opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+/* ==== 권역별 텍스트 타이틀 ==== */
+.city-region-title {
+  font-size: 15px;
+  font-weight: bold;
+  color: #111;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 4px;
+}
+
+.city-region-title.mt {
+  margin-top: 12px;
+}
+
+.city-sub-title {
+  font-size: 12px;
+  font-weight: bold;
+  color: #555;
+  margin-top: 4px;
+}
+
+/* ==== 히스토리 토글 버튼 ==== */
+#toggle-history {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px;
+  font-weight: bold;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+#toggle-history:hover {
+  background-color: #218838;
+}
+
+/* ==== 히스토리 패널 헤더 ==== */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
+}
+
+#clear-all-history {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-right: 8px;
+  transition: background-color 0.2s;
+}
+
+#clear-all-history:hover {
+  background: #c82333;
+}
+
+#close-history {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.2s;
+}
+
+#close-history:hover {
+  color: #111;
+}
+
+/* ==== 개발용 초기화 버튼 ==== */
+#dev-reset-btn {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 9999;
+  background: #ff4444;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+#dev-reset-btn:hover {
+  opacity: 1;
+  background: #cc0000;
+}
+
+/* ==== 모바일 환경 대응 (반응형 UI) ==== */
+@media (max-width: 768px) {
+  .drag-handle-wrapper {
+    display: flex; /* 모바일에서 드래그 핸들 표시 */
+  }
+
+  #ui-panel,
+  #history-panel {
+    top: auto;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 0 20px 20px 20px; /* 핸들 영역이 가장 위에 오도록 패딩 조절 */
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  #ui-panel {
+    height: 85vh; /* 화면에 꽉 차게 설정 */
+    max-height: none;
+    transform: translateY(
+      calc(100% - 110px)
+    ); /* 기본 상태: 설명 부분(약 110px)만 보이게 내림 */
+    transition: transform 0.3s ease;
+  }
+  #ui-panel.expanded {
+    transform: translateY(0); /* 위로 쭉 올린 상태 */
+  }
+  #ui-panel.dragging {
+    transition: none; /* 드래그 중에는 애니메이션 끄기 */
+  }
+
+  #history-panel {
+    max-height: 70vh;
+    z-index: 1010; /* 메인 패널 위로 올라오도록 설정 */
+  }
+
+  .hidden {
+    transform: translateY(
+      50px
+    ) !important; /* 모바일은 아래로 스르륵 내려가며 사라짐 */
+  }
+
+  .city-btn {
+    padding: 8px 14px; /* 터치하기 편하게 버튼 크기 약간 증가 */
+    font-size: 14px;
+  }
+
+  #toast-message {
+    bottom: auto;
+    top: 20px; /* 바텀 시트와 겹치지 않게 상단으로 이동 */
+    transform: translate(-50%, -20px);
+  }
+
+  #dev-reset-btn {
+    bottom: auto;
+    top: 20px;
+    right: 20px;
+    left: auto; /* 지도 컨트롤과 겹치지 않게 우측 상단으로 이동 */
+  }
 }

@@ -46,18 +46,21 @@ if (devResetBtn) {
   });
 }
 
-// ==== PC 환경 패널 최소화 및 복원 ====
-const uiPanel = document.getElementById('ui-panel'); // 위치 이동
-const minimizeBtn = document.getElementById('minimize-panel-btn');
-const restoreBtn = document.getElementById('restore-panel-btn');
+// ==== PC 환경 패널 서랍 토글 ====
+const uiPanel = document.getElementById('ui-panel');
+const toggleBtn = document.getElementById('panel-toggle-btn');
 
-if (minimizeBtn && restoreBtn) {
-  minimizeBtn.addEventListener('click', () => {
-    uiPanel.classList.add('collapsed');
-    restoreBtn.classList.remove('hidden-btn');
-  });
-  restoreBtn.addEventListener('click', () => {
-    uiPanel.classList.remove('collapsed');
-    restoreBtn.classList.add('hidden-btn');
+if (toggleBtn && uiPanel) {
+  toggleBtn.addEventListener('click', () => {
+    uiPanel.classList.toggle('collapsed');
+    toggleBtn.classList.toggle('collapsed'); // 버튼 자신도 같이 이동시킴
+
+    if (uiPanel.classList.contains('collapsed')) {
+      toggleBtn.innerText = '▶';
+      toggleBtn.title = '패널 열기';
+    } else {
+      toggleBtn.innerText = '◀';
+      toggleBtn.title = '패널 숨기기';
+    }
   });
 }

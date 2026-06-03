@@ -52,9 +52,6 @@
         <h1 style="margin: 0; font-size: 22px; color: #111">
           🌍 Your Trip History
         </h1>
-        <button id="minimize-panel-btn" class="pc-only-btn" title="패널 숨기기">
-          ◀ 접기
-        </button>
       </div>
       <div style="font-size: 14px; color: #555">
         여행 중에 찍은 사진을 업로드해 발자취를 남겨보세요!
@@ -184,6 +181,11 @@
       </div>
     </div>
 
+    <!-- PC 전용 서랍 손잡이 (패널 밖으로 빼내어 잘림 현상 방지) -->
+    <button id="panel-toggle-btn" class="pc-only-btn" title="패널 숨기기">
+      ◀
+    </button>
+
     <!-- 히스토리 패널 -->
     <div id="history-panel" class="hidden">
       <div class="history-header">
@@ -204,14 +206,5 @@
 
     <!-- 개발용 초기화 버튼 -->
     <button id="dev-reset-btn">🛠️ 개발용 초기화</button>
-
-    <!-- 패널 열기 버튼 (PC 전용, 숨겨져 있을 때만 보임) -->
-    <button
-      id="restore-panel-btn"
-      class="pc-only-btn hidden-btn"
-      title="패널 열기"
-    >
-      ▶ 열기
-    </button>
   </body>
 </html>

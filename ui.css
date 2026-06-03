@@ -32,6 +32,9 @@
 .upload-btn {
   background-color: #007bff;
 }
+.upload-btn.processing {
+  pointer-events: none; /* 처리 중 중복 클릭 방지 */
+}
 .upload-btn:hover {
   background-color: #0056b3;
 }

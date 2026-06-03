@@ -6,10 +6,28 @@ document
     if (!files || files.length === 0) return;
 
     const uploadLabel = document.getElementById('upload-label');
-    const originalText = uploadLabel.innerHTML;
-    uploadLabel.innerHTML = '⏳ 위치 및 주소 분석 중...';
+    const uploadInput = document.getElementById('file-upload');
+    const originalText = '📸 사진 업로드 (여러 장 가능)';
 
+    const totalFiles = files.length;
     let validPoints = 0;
+    const mobileOverlay = document.getElementById('mobile-progress-overlay');
+
+    const updateProgress = (current) => {
+      const percent = Math.round((current / totalFiles) * 100);
+      uploadLabel.innerHTML = `⏳ 처리 중... (${current} / ${totalFiles})`;
+      uploadLabel.appendChild(uploadInput); // input 요소 유지 (이벤트 리스너 버그 방지용)
+      uploadLabel.style.background = `linear-gradient(to right, #28a745 ${percent}%, #007bff ${percent}%)`;
+      uploadLabel.classList.add('processing');
+
+      if (mobileOverlay && window.innerWidth <= 768) {
+        mobileOverlay.classList.add('active');
+        mobileOverlay.innerHTML = `⏳ 위치 분석 중<br><span style="font-size: 26px; font-weight: bold; margin-top: 10px; display: inline-block;">${current} / ${totalFiles}</span>`;
+      }
+    };
+
+    updateProgress(0);
+
     for (let i = 0; i < files.length; i++) {
       let file = files[i];
       try {
@@ -39,10 +57,16 @@ document
       } catch (error) {
         console.error('파일 처리 중 오류:', file.name, error);
       }
+      updateProgress(i + 1);
     }
 
-    event.target.value = '';
+    uploadInput.value = '';
     uploadLabel.innerHTML = originalText;
+    uploadLabel.appendChild(uploadInput);
+    uploadLabel.style.background = ''; // 상태바 초기화
+    uploadLabel.classList.remove('processing');
+    if (mobileOverlay) mobileOverlay.classList.remove('active');
+
     window.showToast(`${files.length}장 중 ${validPoints}장 성공했습니다.`);
 
     if (validPoints > 0) {

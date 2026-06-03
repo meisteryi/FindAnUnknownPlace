@@ -218,3 +218,60 @@
   font-size: 12px;
   cursor: pointer;
 }
+
+/* ==== PC 전용 패널 토글 버튼 ==== */
+.pc-only-btn {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f8f9fa;
+  cursor: pointer;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #555;
+  display: flex;
+  align-items: center;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
+}
+
+.pc-only-btn:hover {
+  background-color: #e2e6ea;
+  color: #111;
+}
+
+#restore-panel-btn {
+  position: absolute;
+  top: 90px; /* 줌(+/-) 버튼과 겹치지 않게 아래로 이동 */
+  left: 0;
+  height: 40px;
+  border-radius: 0 8px 8px 0;
+  border-left: none;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+}
+
+.hidden-btn {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  #ui-panel {
+    transition:
+      transform 0.3s ease,
+      opacity 0.3s ease;
+  }
+  #ui-panel.collapsed {
+    transform: translateX(calc(-100% - 50px)); /* 왼쪽으로 완전히 숨김 */
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .pc-only-btn {
+    display: none !important; /* 모바일 환경에서는 완전 비활성화 */
+  }
+}

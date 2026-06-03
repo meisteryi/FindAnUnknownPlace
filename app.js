@@ -65,7 +65,21 @@ window.renderMarkers = function () {
 
   let bounds = L.latLngBounds();
   window.savedLocations.forEach((loc) => {
-    L.marker([loc.lat, loc.lng], { icon: greenDotIcon }).addTo(markerGroup);
+    // 말풍선(팝업)에 들어갈 HTML 내용 구성
+    const popupContent = `
+      <div style="text-align: center; min-width: 150px;">
+        <div style="font-weight: bold; font-size: 13px; margin-bottom: 6px; word-break: keep-all; line-height: 1.4;">${loc.address}</div>
+        <div style="font-size: 11px; color: #888;">📸 ${loc.date}</div>
+      </div>
+    `;
+    L.marker([loc.lat, loc.lng], { icon: greenDotIcon })
+      .bindPopup(popupContent, { closeButton: false, offset: [0, -10] }) // offset으로 팝업이 점을 가리지 않게 살짝 위로 띄움
+      .on('click', () => {
+        // 팝업이 열릴 때 해당 위치로 부드럽게 화면 이동 및 줌인 (최소 줌 레벨 16 보장)
+        const targetZoom = Math.max(map.getZoom(), 16);
+        map.flyTo([loc.lat, loc.lng], targetZoom, { duration: 1.0 });
+      })
+      .addTo(markerGroup);
     bounds.extend([loc.lat, loc.lng]);
   });
   return bounds;

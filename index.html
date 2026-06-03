@@ -28,7 +28,7 @@
         여러 장의 사진을 올려 발자취를 남겨보세요!
       </div>
 
-      <label class="upload-btn">
+      <label class="upload-btn" id="upload-label">
         📸 사진 업로드 (여러 장 가능)
         <input
           type="file"
@@ -84,6 +84,97 @@
           </button>
         </div>
       </div>
+
+      <!-- 히스토리 버튼 추가 -->
+      <button
+        id="toggle-history"
+        class="city-btn"
+        style="
+          background-color: #28a745;
+          color: white;
+          border: none;
+          padding: 10px;
+          font-weight: bold;
+          font-size: 14px;
+          margin-top: 10px;
+        "
+      >
+        📜 방문 히스토리 보기
+      </button>
     </div>
+
+    <!-- 히스토리 패널 -->
+    <div id="history-panel" class="hidden">
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 16px;
+          padding-bottom: 10px;
+          border-bottom: 2px solid #eee;
+        "
+      >
+        <h2 style="margin: 0; font-size: 18px">방문 히스토리</h2>
+        <div>
+          <button
+            id="clear-all-history"
+            style="
+              background: #dc3545;
+              color: white;
+              border: none;
+              padding: 6px 10px;
+              border-radius: 4px;
+              font-size: 12px;
+              cursor: pointer;
+              margin-right: 8px;
+            "
+          >
+            전체 삭제
+          </button>
+          <button
+            id="close-history"
+            style="
+              background: none;
+              border: none;
+              font-size: 24px;
+              cursor: pointer;
+              color: #555;
+            "
+          >
+            &times;
+          </button>
+        </div>
+      </div>
+      <div id="history-list"></div>
+    </div>
+
+    <!-- 토스트 메시지 -->
+    <div id="toast-message"></div>
+
+    <!-- 개발용 초기화 버튼 -->
+    <button
+      id="dev-reset-btn"
+      style="
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 9999;
+        background: #ff4444;
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 12px;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      "
+      onmouseover="this.style.opacity = '1'"
+      onmouseout="this.style.opacity = '0.8'"
+    >
+      🛠️ 개발용 초기화
+    </button>
   </body>
 </html>

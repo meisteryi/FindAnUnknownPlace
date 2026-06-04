@@ -190,8 +190,30 @@
     <div id="history-panel" class="hidden">
       <div class="history-header">
         <h2 style="margin: 0; font-size: 18px">방문 히스토리</h2>
-        <div>
-          <button id="clear-all-history">전체 삭제</button>
+        <div style="display: flex; gap: 6px; align-items: center">
+          <button
+            id="backup-history"
+            class="header-btn backup-btn"
+            title="데이터 내보내기(백업)"
+          >
+            💾
+          </button>
+          <label
+            class="header-btn restore-btn"
+            title="데이터 불러오기(복원)"
+            style="cursor: pointer; margin: 0"
+          >
+            📂
+            <input
+              type="file"
+              id="restore-history"
+              accept=".json"
+              style="display: none"
+            />
+          </label>
+          <button id="clear-all-history" class="header-btn clear-btn">
+            전체 삭제
+          </button>
           <button id="close-history">&times;</button>
         </div>
       </div>

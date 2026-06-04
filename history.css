@@ -118,19 +118,46 @@
   padding-bottom: 10px;
   border-bottom: 2px solid #eee;
 }
-#clear-all-history {
-  background: #dc3545;
+
+.header-btn {
   color: white;
   border: none;
   padding: 6px 10px;
   border-radius: 12px;
   font-size: 12px;
   cursor: pointer;
-  margin-right: 8px;
 }
-#clear-all-history:hover {
+
+.backup-btn {
+  background: #007bff;
+  padding: 6px;
+  font-size: 14px;
+}
+.backup-btn:hover {
+  background: #0056b3;
+}
+
+.restore-btn {
+  background: #28a745;
+  padding: 6px;
+  font-size: 14px;
+}
+.restore-btn:hover {
+  background: #218838;
+}
+
+.clear-btn {
+  background: #dc3545;
+  margin-right: 4px;
+}
+.clear-btn:hover {
   background: #c82333;
 }
+
+#clear-all-history {
+  /* 기존 스타일 속성은 공통 클래스(.header-btn, .clear-btn)로 위임했습니다 */
+}
+
 #close-history {
   background: none;
   border: none;

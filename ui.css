@@ -66,6 +66,36 @@
   background-color: #138496;
 }
 
+.recommend-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 12px;
+  border-radius: 24px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 15px;
+  font-weight: bold;
+  border: none;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  line-height: 1.2;
+  box-shadow: 0 4px 10px rgba(118, 75, 162, 0.4);
+}
+.recommend-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(118, 75, 162, 0.6);
+}
+.recommend-btn.active {
+  background: #dc3545;
+  box-shadow: 0 4px 10px rgba(220, 53, 69, 0.4);
+}
+
 .city-section {
   display: flex;
   flex-direction: column;
@@ -88,6 +118,44 @@
 }
 .city-btn:hover {
   background-color: #e2e6ea;
+}
+.city-btn.active-city {
+  background-color: #007bff;
+  color: white;
+  border-color: #0056b3;
+  font-weight: bold;
+}
+.city-btn.active-city:hover {
+  background-color: #0056b3;
+}
+
+.sub-button-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  background-color: #f1f3f5;
+  border-radius: 8px;
+
+  /* 애니메이션을 위한 초기 상태(닫힘) 설정 */
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  padding: 0 10px;
+  overflow: hidden;
+  transition:
+    max-height 0.3s ease,
+    opacity 0.3s ease,
+    margin-top 0.3s ease,
+    padding 0.3s ease;
+}
+.sub-button-group.open {
+  max-height: 150px;
+  opacity: 1;
+  margin-top: 4px;
+  padding: 8px 10px;
+}
+.sub-btn {
+  background-color: #ffffff;
 }
 
 .city-region-title {
@@ -177,4 +245,37 @@
   .pc-only-btn {
     display: none !important; /* 모바일 환경에서는 완전 비활성화 */
   }
+}
+
+/* ==== 메뉴 뷰(View) 토글 및 카테고리 필터 스타일 ==== */
+.view-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.view-hidden {
+  display: none !important;
+}
+
+.category-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.filter-label {
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: #333;
+  font-weight: 500;
+}
+.filter-label input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: #764ba2;
+  cursor: pointer;
 }

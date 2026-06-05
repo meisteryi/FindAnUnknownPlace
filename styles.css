@@ -400,3 +400,35 @@ body {
     left: auto; /* 지도 컨트롤과 겹치지 않게 우측 상단으로 이동 */
   }
 }
+
+/* ==== 미개척지 원형 오버레이 안개(블러) 효과 ==== */
+.frontier-circle-blur {
+  filter: blur(15px);
+  -webkit-filter: blur(15px); /* Safari 지원 */
+  transform: translate3d(0, 0, 0); /* 렌더링 성능 최적화 */
+}
+
+/* ==== 뻗어나가는 길 애니메이션 ==== */
+.path-extend-anim {
+  stroke-dasharray: 3000;
+  stroke-dashoffset: 3000;
+  animation: extendPath 6s ease-out forwards;
+}
+
+@keyframes extendPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.path-retract-anim {
+  stroke-dasharray: 3000;
+  stroke-dashoffset: 0;
+  animation: retractPath 4s ease-in forwards;
+}
+
+@keyframes retractPath {
+  to {
+    stroke-dashoffset: 3000;
+  }
+}

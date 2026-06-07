@@ -154,7 +154,43 @@ window.savedLocations = window.savedLocations.map((loc) => ({
   address: loc.address || '주소 정보 없음 (과거 기록)',
   date: loc.date || '날짜 정보 없음',
 }));
-localStorage.setItem(STORAGE_KEY, JSON.stringify(window.savedLocations));
+
+window.currentUser = null;
+window.db = null;
+window.firebaseSet = null;
+window.firebaseRef = null;
+
+// ==== 클라우드 데이터 동기화 헬퍼 함수 ====
+window.syncToFirebase = async function () {
+  if (
+    window.currentUser &&
+    window.db &&
+    window.firebaseSet &&
+    window.firebaseRef
+  ) {
+    try {
+      await window.firebaseSet(
+        window.firebaseRef(
+          window.db,
+          `users/${window.currentUser.uid}/locations`,
+        ),
+        window.savedLocations,
+      );
+    } catch (error) {
+      console.error('Firebase 동기화 실패:', error);
+    }
+  } else {
+    // 비로그인 상태일 때는 기존처럼 기기 로컬 스토리지에 저장
+    if (window.savedLocations.length > 0) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(window.savedLocations));
+    } else {
+      localStorage.removeItem(STORAGE_KEY);
+    }
+  }
+};
+
+// 초기 로딩 시 데이터 형식을 맞추고 1회 저장
+if (!window.currentUser) window.syncToFirebase();
 
 window.renderMarkers = function () {
   markerGroup.clearLayers();
@@ -211,7 +247,7 @@ async function updateLegacyRecords() {
     }
   }
   if (hasUpdates) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(window.savedLocations));
+    window.syncToFirebase();
     if (
       !document.getElementById('history-panel').classList.contains('hidden') &&
       window.renderHistory
@@ -604,3 +640,114 @@ window.startRecommendSearch = async function () {
     window.showToast('장소를 불러오는 중 오류가 발생했습니다.');
   }
 };
+
+// ==== Firebase 설정 및 UI 연동 ====
+const firebaseConfig = {
+  apiKey: 'AIzaSyBxPkir6dVhSLaWY2mZH4eOaI8YsT7qgdI',
+  authDomain: 'findanunknownplace.firebaseapp.com',
+  databaseURL: 'https://findanunknownplace-default-rtdb.firebaseio.com',
+  projectId: 'findanunknownplace',
+  storageBucket: 'findanunknownplace.firebasestorage.app',
+  messagingSenderId: '850452352404',
+  appId: '1:850452352404:web:0a2643876324ac77c35381',
+  measurementId: 'G-VX303HR35M',
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  // 동적으로 패널 최상단에 로그인 UI 삽입
+  const uiPanel = document.getElementById('ui-panel');
+  if (uiPanel) {
+    const authContainer = document.createElement('div');
+    authContainer.id = 'auth-container';
+    authContainer.innerHTML = `
+      <button id="login-btn" class="login-btn">
+        <svg style="width:18px;height:18px;" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Google 로그인하여 기록 동기화
+      </button>
+      <div id="user-profile" class="user-profile-box" style="display: none;">
+        <span id="user-name"></span>
+        <button id="logout-btn" class="logout-btn">로그아웃</button>
+      </div>
+    `;
+    uiPanel.insertBefore(authContainer, uiPanel.firstChild);
+  }
+});
+
+async function initFirebase() {
+  try {
+    // ES 모듈 동적 로드 (기존 HTML 구조 변경 없이 적용)
+    const { initializeApp } =
+      await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
+    const {
+      getAuth,
+      GoogleAuthProvider,
+      signInWithPopup,
+      onAuthStateChanged,
+      signOut,
+    } =
+      await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
+    const { getDatabase, ref, set, get } =
+      await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js');
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    window.db = getDatabase(app);
+    window.firebaseSet = set;
+    window.firebaseRef = ref;
+    const provider = new GoogleAuthProvider();
+
+    onAuthStateChanged(auth, async (user) => {
+      const loginBtn = document.getElementById('login-btn');
+      const userProfile = document.getElementById('user-profile');
+      const userName = document.getElementById('user-name');
+
+      if (user) {
+        window.currentUser = user;
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (userProfile) userProfile.style.display = 'flex';
+        if (userName) userName.innerText = user.displayName + '님';
+
+        window.showToast('☁️ 클라우드 데이터를 확인하는 중...');
+        const snapshot = await get(
+          ref(window.db, `users/${user.uid}/locations`),
+        );
+        if (snapshot.exists()) {
+          window.savedLocations = snapshot.val() || [];
+          window.showToast('☁️ 클라우드 데이터 동기화 완료!');
+        } else {
+          // 클라우드가 비어있다면 현재 폰/컴퓨터의 기존 데이터를 클라우드로 백업
+          const localData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+          if (localData.length > 0) {
+            window.savedLocations = localData;
+            await window.syncToFirebase();
+            localStorage.removeItem(STORAGE_KEY);
+            window.showToast('☁️ 기존 기기의 기록을 클라우드로 이동했습니다.');
+          } else window.savedLocations = [];
+        }
+      } else {
+        window.currentUser = null;
+        if (loginBtn) loginBtn.style.display = 'flex';
+        if (userProfile) userProfile.style.display = 'none';
+        window.savedLocations =
+          JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+      }
+      window.renderMarkers();
+      if (window.renderHistory) window.renderHistory();
+    });
+
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('#login-btn')) {
+        e.preventDefault();
+        signInWithPopup(auth, provider).catch((err) =>
+          console.error('로그인 에러:', err),
+        );
+      } else if (e.target.closest('#logout-btn')) {
+        e.preventDefault();
+        signOut(auth).catch((err) => console.error('로그아웃 에러:', err));
+      }
+    });
+  } catch (error) {
+    console.error('Firebase 로드 실패:', error);
+  }
+}
+initFirebase();

@@ -70,10 +70,7 @@ document
     window.showToast(`${files.length}장 중 ${validPoints}장 성공했습니다.`);
 
     if (validPoints > 0) {
-      localStorage.setItem(
-        'unseen_map_history',
-        JSON.stringify(window.savedLocations),
-      );
+      window.syncToFirebase();
       const newBounds = window.renderMarkers();
 
       if (validPoints === 1)

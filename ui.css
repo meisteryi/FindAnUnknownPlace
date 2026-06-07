@@ -25,6 +25,59 @@
   display: none; /* Chrome, Safari, Opera */
 }
 
+/* ==== 로그인 및 유저 프로필 영역 ==== */
+#auth-container {
+  margin-bottom: 4px;
+}
+.login-btn {
+  background-color: #ffffff;
+  color: #333;
+  padding: 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  transition:
+    background-color 0.2s,
+    box-shadow 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+.login-btn:hover {
+  background-color: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.user-profile-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background-color: #f8f9fa;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #ced4da;
+  display: none; /* 로그인 전에는 숨김 */
+}
+.logout-btn {
+  background: none;
+  border: none;
+  color: #dc3545;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 4px;
+}
+.logout-btn:hover {
+  text-decoration: underline;
+}
+
 /* ==== 메인 액션 버튼 그룹 박스 ==== */
 .main-actions {
   display: flex;

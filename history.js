@@ -46,10 +46,7 @@ window.renderHistory = function () {
 window.deleteRecord = function (id) {
   if (!confirm('이 방문 기록을 삭제하시겠습니까?')) return;
   window.savedLocations = window.savedLocations.filter((loc) => loc.id !== id);
-  localStorage.setItem(
-    'unseen_map_history',
-    JSON.stringify(window.savedLocations),
-  );
+  window.syncToFirebase();
   window.renderMarkers();
   window.renderHistory();
 };
@@ -88,7 +85,7 @@ document.getElementById('clear-all-history').addEventListener('click', () => {
     return;
 
   window.savedLocations = [];
-  localStorage.removeItem('unseen_map_history');
+  window.syncToFirebase();
   window.renderMarkers();
   window.renderHistory();
 });
@@ -143,10 +140,7 @@ document
         } else finalData = importedData;
 
         window.savedLocations = finalData;
-        localStorage.setItem(
-          'unseen_map_history',
-          JSON.stringify(window.savedLocations),
-        );
+        window.syncToFirebase();
         window.renderMarkers();
         window.renderHistory();
         alert('데이터 복원이 완료되었습니다!');

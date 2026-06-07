@@ -660,10 +660,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const authContainer = document.createElement('div');
     authContainer.id = 'auth-container';
     authContainer.innerHTML = `
-      <button id="login-btn" class="login-btn">
-        <svg style="width:18px;height:18px;" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-        Google 로그인하여 기록 동기화
-      </button>
+      <div id="login-form">
+        <input type="email" id="email-input" placeholder="이메일 (아이디)" class="auth-input" />
+        <input type="password" id="password-input" placeholder="비밀번호 (6자리 이상)" class="auth-input" />
+        <div class="auth-buttons">
+          <button id="email-login-btn" class="login-btn">로그인</button>
+          <button id="email-signup-btn" class="signup-btn">가입하기</button>
+        </div>
+      </div>
       <div id="user-profile" class="user-profile-box" style="display: none;">
         <span id="user-name"></span>
         <button id="logout-btn" class="logout-btn">로그아웃</button>
@@ -680,8 +684,8 @@ async function initFirebase() {
       await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js');
     const {
       getAuth,
-      GoogleAuthProvider,
-      signInWithPopup,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
       onAuthStateChanged,
       signOut,
     } =
@@ -694,18 +698,19 @@ async function initFirebase() {
     window.db = getDatabase(app);
     window.firebaseSet = set;
     window.firebaseRef = ref;
-    const provider = new GoogleAuthProvider();
 
     onAuthStateChanged(auth, async (user) => {
-      const loginBtn = document.getElementById('login-btn');
+      const loginForm = document.getElementById('login-form');
       const userProfile = document.getElementById('user-profile');
       const userName = document.getElementById('user-name');
 
       if (user) {
         window.currentUser = user;
-        if (loginBtn) loginBtn.style.display = 'none';
+        if (loginForm) loginForm.style.display = 'none';
         if (userProfile) userProfile.style.display = 'flex';
-        if (userName) userName.innerText = user.displayName + '님';
+        // 이메일 앞부분을 잘라서 임시 닉네임으로 사용
+        const displayName = user.email ? user.email.split('@')[0] : '사용자';
+        if (userName) userName.innerText = displayName + '님';
 
         window.showToast('☁️ 클라우드 데이터를 확인하는 중...');
         const snapshot = await get(
@@ -726,7 +731,7 @@ async function initFirebase() {
         }
       } else {
         window.currentUser = null;
-        if (loginBtn) loginBtn.style.display = 'flex';
+        if (loginForm) loginForm.style.display = 'block';
         if (userProfile) userProfile.style.display = 'none';
         window.savedLocations =
           JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
@@ -736,11 +741,43 @@ async function initFirebase() {
     });
 
     document.addEventListener('click', (e) => {
-      if (e.target.closest('#login-btn')) {
+      if (e.target.closest('#email-login-btn')) {
         e.preventDefault();
-        signInWithPopup(auth, provider).catch((err) =>
-          console.error('로그인 에러:', err),
-        );
+        const email = document.getElementById('email-input').value;
+        const password = document.getElementById('password-input').value;
+        if (!email || !password)
+          return alert('이메일과 비밀번호를 입력해주세요.');
+
+        signInWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            document.getElementById('password-input').value = '';
+          })
+          .catch((err) => {
+            console.error('로그인 에러:', err);
+            alert(
+              '로그인 실패: 등록되지 않은 아이디이거나 비밀번호가 틀렸습니다.',
+            );
+          });
+      } else if (e.target.closest('#email-signup-btn')) {
+        e.preventDefault();
+        const email = document.getElementById('email-input').value;
+        const password = document.getElementById('password-input').value;
+        if (!email || !password)
+          return alert('가입하실 이메일과 비밀번호를 입력해주세요.');
+        if (password.length < 6)
+          return alert('비밀번호는 최소 6자리 이상이어야 합니다.');
+
+        createUserWithEmailAndPassword(auth, email, password)
+          .then(() => {
+            document.getElementById('password-input').value = '';
+            window.showToast('회원가입이 완료되었습니다!');
+          })
+          .catch((err) => {
+            console.error('가입 에러:', err);
+            alert(
+              '가입 실패: 이미 존재하는 이메일이거나 형식이 잘못되었습니다.',
+            );
+          });
       } else if (e.target.closest('#logout-btn')) {
         e.preventDefault();
         signOut(auth).catch((err) => console.error('로그아웃 에러:', err));

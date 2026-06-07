@@ -29,6 +29,20 @@
 #auth-container {
   margin-bottom: 4px;
 }
+.auth-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  font-size: 14px;
+  font-family: inherit;
+}
+.auth-buttons {
+  display: flex;
+  gap: 8px;
+}
 .login-btn {
   background-color: #ffffff;
   color: #333;
@@ -47,11 +61,27 @@
   align-items: center;
   gap: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  width: 100%;
+  flex: 1;
 }
 .login-btn:hover {
   background-color: #f8f9fa;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.signup-btn {
+  background-color: #f8f9fa;
+  color: #333;
+  padding: 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 1px solid #ddd;
+  transition: background-color 0.2s;
+  flex: 1;
+}
+.signup-btn:hover {
+  background-color: #e2e6ea;
 }
 .user-profile-box {
   display: flex;

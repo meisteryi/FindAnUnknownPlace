@@ -90,10 +90,46 @@ const markerGroup =
   typeof L.markerClusterGroup === 'function'
     ? L.markerClusterGroup({
         chunkedLoading: true, // 대량의 마커를 부드럽게 렌더링
-        spiderfyOnMaxZoom: true, // 동일한 위치에 겹친 마커를 끝까지 줌인하면 흩뿌려서(Spiderfy) 보여줌
+        spiderfyOnMaxZoom: false, // 겹친 마커를 흩뿌리지 않고 모아서 보여주기 위해 비활성화
         showCoverageOnHover: false, // 마우스 오버 시 클러스터 바운더리(폴리곤 영역) 숨김
+        zoomToBoundsOnClick: false, // 클러스터 클릭 이벤트를 수동으로 제어하기 위해 비활성화
       }).addTo(map)
     : L.layerGroup().addTo(map);
+
+if (typeof L.markerClusterGroup === 'function') {
+  markerGroup.on('clusterclick', function (a) {
+    const currentZoom = map.getZoom();
+    const cluster = a.layer;
+
+    // 줌 레벨이 16 이상이거나, 마커들이 완전히 겹쳐서 더 이상 풀어지지 않을 때
+    if (currentZoom >= 16) {
+      const markers = cluster.getAllChildMarkers();
+      let combinedHTML =
+        '<div style="max-height: 250px; overflow-y: auto; overflow-x: hidden; padding: 4px;">';
+
+      markers.forEach((m, idx) => {
+        combinedHTML += m.getPopup().getContent();
+        if (idx < markers.length - 1) {
+          combinedHTML +=
+            '<hr style="border: 0; border-top: 1px dashed #ccc; margin: 12px 0;" />';
+        }
+      });
+      combinedHTML += '</div>';
+
+      L.popup({ offset: [0, -10] })
+        .setLatLng(cluster.getLatLng())
+        .setContent(combinedHTML)
+        .openOn(map);
+
+      map.flyTo(cluster.getLatLng(), Math.max(currentZoom, 16), {
+        duration: 1.0,
+      });
+    } else {
+      // 확대가 충분하지 않으면 해당 클러스터 영역으로 줌인 (기본 동작 재현)
+      cluster.zoomToBounds({ padding: [50, 50] });
+    }
+  });
+}
 
 window.activeHistoryMarker = null;
 window.currentLocationMarker = null;

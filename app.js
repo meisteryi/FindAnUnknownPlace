@@ -669,7 +669,10 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       </div>
       <div id="user-profile" class="user-profile-box" style="display: none;">
-        <span id="user-name"></span>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span id="user-name"></span>
+          <button id="edit-nickname-btn" class="edit-btn" title="닉네임 변경">✏️</button>
+        </div>
         <button id="logout-btn" class="logout-btn">로그아웃</button>
       </div>
     `;
@@ -688,6 +691,7 @@ async function initFirebase() {
       signInWithEmailAndPassword,
       onAuthStateChanged,
       signOut,
+      updateProfile,
     } =
       await import('https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js');
     const { getDatabase, ref, set, get } =
@@ -708,8 +712,10 @@ async function initFirebase() {
         window.currentUser = user;
         if (loginForm) loginForm.style.display = 'none';
         if (userProfile) userProfile.style.display = 'flex';
-        // 이메일 앞부분을 잘라서 임시 닉네임으로 사용
-        const displayName = user.email ? user.email.split('@')[0] : '사용자';
+        // 설정된 닉네임이 없으면 이메일 앞부분을 잘라서 임시로 사용
+        const displayName =
+          user.displayName ||
+          (user.email ? user.email.split('@')[0] : '사용자');
         if (userName) userName.innerText = displayName + '님';
 
         window.showToast('☁️ 클라우드 데이터를 확인하는 중...');
@@ -781,6 +787,27 @@ async function initFirebase() {
       } else if (e.target.closest('#logout-btn')) {
         e.preventDefault();
         signOut(auth).catch((err) => console.error('로그아웃 에러:', err));
+      } else if (e.target.closest('#edit-nickname-btn')) {
+        e.preventDefault();
+        const currentName =
+          window.currentUser.displayName ||
+          (window.currentUser.email
+            ? window.currentUser.email.split('@')[0]
+            : '');
+        const newName = prompt('새로운 닉네임을 입력하세요:', currentName);
+
+        if (newName && newName.trim() !== '') {
+          updateProfile(window.currentUser, { displayName: newName.trim() })
+            .then(() => {
+              document.getElementById('user-name').innerText =
+                newName.trim() + '님';
+              window.showToast('닉네임이 변경되었습니다!');
+            })
+            .catch((err) => {
+              console.error('닉네임 변경 에러:', err);
+              alert('닉네임 변경에 실패했습니다.');
+            });
+        }
       }
     });
   } catch (error) {

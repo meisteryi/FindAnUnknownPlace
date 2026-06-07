@@ -107,6 +107,21 @@
 .logout-btn:hover {
   text-decoration: underline;
 }
+.edit-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 4px;
+  opacity: 0.5;
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+.edit-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
 
 /* ==== 메인 액션 버튼 그룹 박스 ==== */
 .main-actions {
